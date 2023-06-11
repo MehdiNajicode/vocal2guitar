@@ -1,5 +1,6 @@
 import io
 import os
+os.system("chmod 777 ffmpeg")
 import torch
 import gradio as gr
 import librosa
