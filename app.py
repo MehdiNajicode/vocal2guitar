@@ -56,16 +56,15 @@ version="v2"
 
 default_audio=load_audio("logs/mute/1_16k_wavs/mute.wav",16000)
 def vc_single(
-    # sid=0,
-    input_audio_path,#待选取
-    f0_up_key,#待选取
+    input_audio_path,
+    f0_up_key,
     f0_method,
-    file_index="logs/added_IVF2225_Flat_nprobe_1_simple-guitar-crepe-guolv_v2.index",#写死
-    index_rate=1,#写死1
-    filter_radius=3,#不需要，随便写，3
-    resample_sr=0,#写死0不需要
-    rms_mix_rate=1,#写死1不需要
-    protect=0.5,#写死0.5不需要
+    file_index="logs/added_IVF2225_Flat_nprobe_1_simple-guitar-crepe-guolv_v2.index",
+    index_rate=1,
+    filter_radius=3,
+    resample_sr=0,
+    rms_mix_rate=1,
+    protect=0.5,
 ):
     global tgt_sr, net_g, vc, hubert_model, version
     if input_audio_path is None:
@@ -116,48 +115,40 @@ def vc_single(
     except:
         info = traceback.format_exc()
         print(info)
-        return "报错了！信息如下：%s"%info, (16000, default_audio)
+        return "Error! Details:\n%s" % info, (16000, default_audio)
 
 app = gr.Blocks()
 with app:
     with gr.Tabs():
-        with gr.TabItem("人声转吉他极简在线demo"):
-            gr.Markdown(
-                value="""
-                变调越高吉他音越细，越低越沉闷
-                """
-            )
-            vc_input = gr.Audio(label="上传音频")
+        with gr.TabItem("Simple Vocal to Guitar Demo"):
+            gr.Markdown("""
+                Adjust pitch shift: Higher values make the guitar sound sharper, lower values make it deeper.
+                """)
+            vc_input = gr.Audio(label="Upload Audio")
             with gr.Column():
                 with gr.Row():
                     vc_transform = gr.Slider(
                         minimum=-12,
                         maximum=12,
-                        label="变调(半音数量,升八度12降八度-12)",
+                        label="Pitch Shift (Semitones, +12 for higher, -12 for lower)",
                         value=0,
                         step=1,
                         interactive=True,
                     )
                     f0method = gr.Radio(
-                        label=i18n(
-                            "选择音高提取算法:语音推荐dio歌声推荐pm"
-                        ),
+                        label="Select Pitch Extraction Algorithm (dio for voice, pm for singing)",
                         choices=["pm", "dio"],
                         value="dio",
                         interactive=True,
                     )
                 with gr.Row():
-                    but = gr.Button(i18n("转换"), variant="primary")
-                    vc_output1 = gr.Textbox(label=i18n("输出信息"))
-                    vc_output2 = gr.Audio(label=i18n("输出音频(右下角三个点,点了可以下载)"))
+                    but = gr.Button("Convert", variant="primary")
+                    vc_output1 = gr.Textbox(label="Output Info")
+                    vc_output2 = gr.Audio(label="Output Audio (Click three dots for download)")
             but.click(
                 vc_single,
-                [
-                    vc_input,
-                    vc_transform,
-                    f0method
-                ],
+                [vc_input, vc_transform, f0method],
                 [vc_output1, vc_output2],
             )
 
-app.launch(server_name="0.0.0.0",quiet=True)
+app.launch(share=True)  # Enable public link
